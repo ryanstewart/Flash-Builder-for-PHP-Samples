@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:forestservicetyped="services.forestservicetyped.*"
+			   xmlns:valueObjects="valueObjects.*"
+			   minWidth="955" minHeight="600">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import spark.events.GridSelectionEvent;
+			
+			protected function dataGrid_creationCompleteHandler(event:FlexEvent):void
+			{
+				getAllForestsResult.token = forestServiceTyped.getAllForests();
+			}
+			
+			
+			protected function button_clickHandler(event:MouseEvent):void
+			{
+				// Please uncomment the below line if Data Management is enabled for NationalForest and updateForest is used as the create function.
+				// var nationalForest:NationalForest = new NationalForest();
+				nationalForest.id = parseInt(idTextInput.text);
+				nationalForest.area = parseFloat(areaTextInput.text);
+				nationalForest.name = nameTextInput.text;
+				nationalForest.closest_city = closest_cityTextInput.text;
+				nationalForest.state = stateTextInput.text;
+				nationalForest.established = establishedDateField.selectedDate;
+				
+				updateForestResult.token = forestServiceTyped.updateForest(nationalForest);
+			}
+			
+			protected function dataGrid_selectionChangeHandler(event:GridSelectionEvent):void
+			{
+				// TODO Auto-generated method stub
+				nationalForest = dataGrid.selectedItem as NationalForest;
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				forestServiceTyped.commit();
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				forestServiceTyped.revertChanges();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:CallResponder id="getAllForestsResult"/>
+		<forestservicetyped:ForestServiceTyped id="forestServiceTyped"
+											   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+											   showBusyCursor="true"/>
+		<valueObjects:NationalForest id="nationalForest"/>
+		<s:CallResponder id="updateForestResult"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:DataGrid id="dataGrid" x="10" y="10" width="461" height="375"
+				creationComplete="dataGrid_creationCompleteHandler(event)" editable="true"
+				requestedRowCount="4" selectionChange="dataGrid_selectionChangeHandler(event)">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="id" headerText="id"></s:GridColumn>
+				<s:GridColumn dataField="area" headerText="area"></s:GridColumn>
+				<s:GridColumn dataField="name" headerText="name"></s:GridColumn>
+				<s:GridColumn dataField="closest_city" headerText="closest_city"></s:GridColumn>
+				<s:GridColumn dataField="state" headerText="state"></s:GridColumn>
+				<s:GridColumn dataField="established" headerText="established"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+		<s:typicalItem>
+			<fx:Object id="id1" area="area1" closest_city="closest_city1" established="established1"
+					   name="name1" state="state1"></fx:Object>
+		</s:typicalItem>
+		<s:AsyncListView list="{getAllForestsResult.lastResult}"/>
+	</s:DataGrid>
+	<s:Form x="500" y="30" defaultButton="{button}">
+		<s:FormItem label="Id">
+			<s:TextInput id="idTextInput" text="{nationalForest.id}"/>
+		</s:FormItem>
+		<s:FormItem label="Area">
+			<s:TextInput id="areaTextInput" text="{nationalForest.area}"/>
+		</s:FormItem>
+		<s:FormItem label="Name">
+			<s:TextInput id="nameTextInput" text="{nationalForest.name}"/>
+		</s:FormItem>
+		<s:FormItem label="Closest_city">
+			<s:TextInput id="closest_cityTextInput" text="{nationalForest.closest_city}"/>
+		</s:FormItem>
+		<s:FormItem label="State">
+			<s:TextInput id="stateTextInput" text="{nationalForest.state}"/>
+		</s:FormItem>
+		<s:FormItem label="Established">
+			<mx:DateField id="establishedDateField" selectedDate="{nationalForest.established}"/>
+		</s:FormItem>
+		<s:Button id="button" label="UpdateForest" click="button_clickHandler(event)"/>
+	</s:Form>
+	<s:Button x="10" y="393" label="Save" click="button1_clickHandler(event)"/>
+	<s:Button x="133" y="394" label="Discard" click="button2_clickHandler(event)"/>
+</s:Application>
